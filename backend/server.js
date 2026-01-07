@@ -17,7 +17,8 @@ const io = new Server(server, {
     origin: [
       "http://localhost:5173", 
       "http://localhost:3000",
-      "https://lastchat-psi.vercel.app"
+      "https://lastchat-psi.vercel.app",
+      "https://oksakib.onrender.com"
     ], 
     methods: ["GET", "POST"],
     credentials: true

@@ -22,7 +22,8 @@ const chatRoutes = require("./routes/chatRoutes");
 const allowedOrigins = [
   "http://localhost:5173", 
   "http://localhost:3000",
-  "https://lastchat-psi.vercel.app"
+  "https://lastchat-psi.vercel.app",
+  "https://oksakib.onrender.com"
 ];
 
 app.use(cors({
