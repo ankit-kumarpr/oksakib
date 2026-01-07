@@ -18,7 +18,7 @@ const OnetoOnechat = () => {
 
   useEffect(() => {
     // Initialize socket connection
-    const newSocket = io("https://newsakib.onrender.com", {
+    const newSocket = io("https://oksakib.onrender.com", {
       transports: ["websocket", "polling"],
       timeout: 20000,
     });
@@ -148,7 +148,7 @@ const OnetoOnechat = () => {
                         src={
                           user.avatar.startsWith("http")
                             ? user.avatar
-                            : `https://newsakib.onrender.com${user.avatar}`
+                            : `https://oksakib.onrender.com${user.avatar}`
                         }
                         alt={user.name}
                         onError={(e) => {

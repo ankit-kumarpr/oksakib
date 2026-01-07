@@ -50,7 +50,7 @@ const OnetoOneliveChat = () => {
     }
 
     // Initialize socket connection
-    const newSocket = io("https://newsakib.onrender.com", {
+    const newSocket = io("https://oksakib.onrender.com", {
       transports: ["websocket", "polling"],
       timeout: 20000,
     });
@@ -269,7 +269,7 @@ const OnetoOneliveChat = () => {
                 src={
                   receiverInfo.avatar.startsWith("http")
                     ? receiverInfo.avatar
-                    : `https://newsakib.onrender.com${receiverInfo.avatar}`
+                    : `https://oksakib.onrender.com${receiverInfo.avatar}`
                 }
                 alt={receiverInfo.name}
                 style={{

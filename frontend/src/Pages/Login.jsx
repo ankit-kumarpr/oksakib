@@ -49,7 +49,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const url = `https://newsakib.onrender.com/api/auth/login`;
+      const url = `https://oksakib.onrender.com/api/auth/login`;
       const headers = {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -103,7 +103,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const url = `https://newsakib.onrender.com/api/auth/register`;
+      const url = `https://oksakib.onrender.com/api/auth/register`;
       const headers = {
         "Content-Type": "application/json",
         Accept: "application/json",

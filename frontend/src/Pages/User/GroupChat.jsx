@@ -61,7 +61,7 @@ const GroupChat = () => {
       return;
     }
 
-    const newSocket = io("https://newsakib.onrender.com", {
+    const newSocket = io("https://oksakib.onrender.com", {
       transports: ["websocket", "polling"],
       timeout: 20000,
     });
@@ -507,7 +507,7 @@ const GroupChat = () => {
                           src={
                             member.avatar.startsWith("http")
                               ? member.avatar
-                              : `https://newsakib.onrender.com${member.avatar}`
+                              : `https://oksakib.onrender.com${member.avatar}`
                           }
                           alt={member.name}
                           style={{

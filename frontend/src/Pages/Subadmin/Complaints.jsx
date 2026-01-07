@@ -352,7 +352,7 @@ const Complaints = () => {
                         src={
                           selectedComplaint.image.startsWith("http")
                             ? selectedComplaint.image
-                            : `https://newsakib.onrender.com${selectedComplaint.image}`
+                            : `https://oksakib.onrender.com${selectedComplaint.image}`
                         }
                         alt="Evidence"
                         className="evidence-thumbnail-modal"
@@ -361,7 +361,7 @@ const Complaints = () => {
                             "http"
                           )
                             ? selectedComplaint.image
-                            : `https://newsakib.onrender.com${selectedComplaint.image}`;
+                            : `https://oksakib.onrender.com${selectedComplaint.image}`;
                           window.open(imageUrl, "_blank");
                         }}
                         onError={(e) => {
