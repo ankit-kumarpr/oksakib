@@ -8,6 +8,8 @@ import robot from "../images/robot-icon.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
+import Base_url from "./config";
+
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -49,7 +51,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const url = `https://oksakib.onrender.com/api/auth/login`;
+      const url = `${Base_url}/auth/login`;
       const headers = {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -103,7 +105,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const url = `https://oksakib.onrender.com/api/auth/register`;
+      const url = `${Base_url}/auth/register`;
       const headers = {
         "Content-Type": "application/json",
         Accept: "application/json",

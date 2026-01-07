@@ -4,7 +4,8 @@ import { FaArrowLeft, FaPaperPlane, FaUser, FaSmile } from "react-icons/fa";
 import axios from "axios";
 import io from "socket.io-client";
 import EmojiPicker from "emoji-picker-react";
-import Base_url from "../config";
+import Base_url, { Socket_url } from "../config";
+
 import "./OnetoOnechat.css";
 import "./OnetoOneliveChat.css";
 
@@ -50,10 +51,11 @@ const OnetoOneliveChat = () => {
     }
 
     // Initialize socket connection
-    const newSocket = io("https://oksakib.onrender.com", {
+    const newSocket = io(Socket_url, {
       transports: ["websocket", "polling"],
       timeout: 20000,
     });
+
     setSocket(newSocket);
 
     // Set user ID and mark user as online globally
@@ -269,7 +271,8 @@ const OnetoOneliveChat = () => {
                 src={
                   receiverInfo.avatar.startsWith("http")
                     ? receiverInfo.avatar
-                    : `https://oksakib.onrender.com${receiverInfo.avatar}`
+                    : `${Socket_url}${receiverInfo.avatar}`
+
                 }
                 alt={receiverInfo.name}
                 style={{
@@ -348,11 +351,10 @@ const OnetoOneliveChat = () => {
             {messages.map((message) => (
               <div
                 key={message._id}
-                className={`message-item ${
-                  String(message.sender._id) === currentUserId
+                className={`message-item ${String(message.sender._id) === currentUserId
                     ? "sent"
                     : "received"
-                }`}
+                  }`}
                 style={{
                   display: "flex",
                   marginBottom: "8px",

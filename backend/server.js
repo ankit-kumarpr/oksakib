@@ -13,13 +13,15 @@ const server = http.createServer(app);
 
 // Attach Socket.IO to server
 const io = new Server(server, {
-  cors: { 
+  cors: {
     origin: [
-      "http://localhost:5173", 
+      "http://localhost:5173",
       "http://localhost:3000",
       "https://lastchat-psi.vercel.app",
-      "https://oksakib.onrender.com"
-    ], 
+      "https://oksakib.onrender.com",
+      "https://oksakib.vercel.app",
+      process.env.CLIENT_URL
+    ].filter(Boolean),
     methods: ["GET", "POST"],
     credentials: true
   },

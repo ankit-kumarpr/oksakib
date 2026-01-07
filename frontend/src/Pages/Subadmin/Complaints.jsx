@@ -13,7 +13,8 @@ import {
   FaCalendarAlt,
   FaImage,
 } from "react-icons/fa";
-import Base_url from "../config";
+import Base_url, { Socket_url } from "../config";
+
 import "../Admin/ViewUsers.css";
 
 const Complaints = () => {
@@ -191,17 +192,15 @@ const Complaints = () => {
           All
         </button>
         <button
-          className={`filter-btn open-filter ${
-            filterStatus === "open" ? "active" : ""
-          }`}
+          className={`filter-btn open-filter ${filterStatus === "open" ? "active" : ""
+            }`}
           onClick={() => setFilterStatus("open")}
         >
           Open
         </button>
         <button
-          className={`filter-btn resolved-filter ${
-            filterStatus === "resolved" ? "active" : ""
-          }`}
+          className={`filter-btn resolved-filter ${filterStatus === "resolved" ? "active" : ""
+            }`}
           onClick={() => setFilterStatus("resolved")}
         >
           Resolved
@@ -352,7 +351,8 @@ const Complaints = () => {
                         src={
                           selectedComplaint.image.startsWith("http")
                             ? selectedComplaint.image
-                            : `https://oksakib.onrender.com${selectedComplaint.image}`
+                            : `${Socket_url}${selectedComplaint.image}`
+
                         }
                         alt="Evidence"
                         className="evidence-thumbnail-modal"
@@ -361,7 +361,8 @@ const Complaints = () => {
                             "http"
                           )
                             ? selectedComplaint.image
-                            : `https://oksakib.onrender.com${selectedComplaint.image}`;
+                            : `${Socket_url}${selectedComplaint.image}`;
+
                           window.open(imageUrl, "_blank");
                         }}
                         onError={(e) => {

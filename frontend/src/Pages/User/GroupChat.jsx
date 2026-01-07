@@ -13,7 +13,8 @@ import {
 import axios from "axios";
 import io from "socket.io-client";
 import EmojiPicker from "emoji-picker-react";
-import Base_url from "../config";
+import Base_url, { Socket_url } from "../config";
+
 import "./GroupChat.css";
 import "./OnetoOnechat.css";
 import "./OnetoOneliveChat.css";
@@ -61,10 +62,11 @@ const GroupChat = () => {
       return;
     }
 
-    const newSocket = io("https://oksakib.onrender.com", {
+    const newSocket = io(Socket_url, {
       transports: ["websocket", "polling"],
       timeout: 20000,
     });
+
     setSocket(newSocket);
 
     const fetchData = async () => {
@@ -443,7 +445,7 @@ const GroupChat = () => {
             </span>
           </div>
           {(group?.participants || group?.users) &&
-          (group.participants || group.users).length > 0 ? (
+            (group.participants || group.users).length > 0 ? (
             <div
               className="members-slider"
               style={{
@@ -507,7 +509,8 @@ const GroupChat = () => {
                           src={
                             member.avatar.startsWith("http")
                               ? member.avatar
-                              : `https://oksakib.onrender.com${member.avatar}`
+                              : `${Socket_url}${member.avatar}`
+
                           }
                           alt={member.name}
                           style={{
@@ -610,9 +613,8 @@ const GroupChat = () => {
             {messages.map((message) => (
               <div
                 key={message._id}
-                className={`message-item ${
-                  String(message.sender._id) === userId ? "sent" : "received"
-                }`}
+                className={`message-item ${String(message.sender._id) === userId ? "sent" : "received"
+                  }`}
                 style={{
                   display: "flex",
                   marginBottom: "8px",

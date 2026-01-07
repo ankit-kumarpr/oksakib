@@ -20,17 +20,19 @@ const chatRoutes = require("./routes/chatRoutes");
 
 // Middlewares
 const allowedOrigins = [
-  "http://localhost:5173", 
+  "http://localhost:5173",
   "http://localhost:3000",
   "https://lastchat-psi.vercel.app",
-  "https://oksakib.onrender.com"
-];
+  "https://oksakib.onrender.com",
+  "https://oksakib.vercel.app",
+  process.env.CLIENT_URL
+].filter(Boolean); // Remove undefined/null if CLIENT_URL is not set
 
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
+
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -55,7 +57,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files (uploaded images) with CORS headers
 app.use('/uploads', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://lastchat-psi.vercel.app');
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
   res.header('Access-Control-Allow-Methods', 'GET');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   res.header('Access-Control-Allow-Credentials', 'true');

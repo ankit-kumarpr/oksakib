@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaSearch, FaTimes, FaUser } from "react-icons/fa";
 import axios from "axios";
 import io from "socket.io-client";
-import Base_url from "../config";
+import Base_url, { Socket_url } from "../config";
+
 import "./OnetoOnechat.css";
 
 const OnetoOnechat = () => {
@@ -18,10 +19,11 @@ const OnetoOnechat = () => {
 
   useEffect(() => {
     // Initialize socket connection
-    const newSocket = io("https://oksakib.onrender.com", {
+    const newSocket = io(Socket_url, {
       transports: ["websocket", "polling"],
       timeout: 20000,
     });
+
     setSocket(newSocket);
 
     // Set current user as online globally
@@ -148,7 +150,8 @@ const OnetoOnechat = () => {
                         src={
                           user.avatar.startsWith("http")
                             ? user.avatar
-                            : `https://oksakib.onrender.com${user.avatar}`
+                            : `${Socket_url}${user.avatar}`
+
                         }
                         alt={user.name}
                         onError={(e) => {
@@ -172,15 +175,14 @@ const OnetoOnechat = () => {
                           "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                         borderRadius: "50%",
                       }}
-                      onError={() => {}}
+                      onError={() => { }}
                     >
                       {user.name?.charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <div
-                    className={`status-dot ${
-                      isUserOnline(user._id) ? "online" : "offline"
-                    }`}
+                    className={`status-dot ${isUserOnline(user._id) ? "online" : "offline"
+                      }`}
                   ></div>
                 </div>
 
