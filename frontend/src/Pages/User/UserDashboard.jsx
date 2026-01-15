@@ -67,7 +67,7 @@ const UserDashboard = () => {
 
         try {
             setCreatingRoom(true);
-            const url = `${Base_url}/rooms`;
+            const url = `${Base_url}/rooms/create`;
             const headers = {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`

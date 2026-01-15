@@ -13,6 +13,7 @@ const Groups = () => {
     const [loading, setLoading] = useState(true);
     const [expandedRoom, setExpandedRoom] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [creating, setCreating] = useState(false);
     const [newRoom, setNewRoom] = useState({
         name: '',
         roomId: ''
@@ -41,18 +42,34 @@ const Groups = () => {
     };
 
     const CreateRoom = async () => {
+        if (!newRoom.name.trim()) {
+            alert("Please enter a room name");
+            return;
+        }
+
         try {
+            setCreating(true);
             const url = `${Base_url}/rooms/create`;
             const headers = {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`
             };
-            await axios.post(url, newRoom, { headers });
+            const response = await axios.post(url, {
+                name: newRoom.name.trim(),
+                roomId: newRoom.roomId.trim() || undefined
+            }, { headers });
+
+            console.log("Room created:", response.data);
+            alert("Room created successfully!");
             setShowCreateModal(false);
             setNewRoom({ name: '', roomId: '' });
             GetRooms();
         } catch (error) {
-            console.log("Error creating room:", error);
+            console.error("Error creating room:", error);
+            const errorMsg = error.response?.data?.message || "Error creating room. Please try again.";
+            alert(errorMsg);
+        } finally {
+            setCreating(false);
         }
     };
 
@@ -83,7 +100,7 @@ const Groups = () => {
                     <FaArrowLeft size={20} />
                 </button>
                 <h2>Rooms Management</h2>
-                <button 
+                <button
                     className="add-group-button"
                     onClick={() => setShowCreateModal(true)}
                 >
@@ -101,9 +118,9 @@ const Groups = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 {searchTerm && (
-                    <FaTimes 
-                        className="clear-search" 
-                        onClick={() => setSearchTerm('')} 
+                    <FaTimes
+                        className="clear-search"
+                        onClick={() => setSearchTerm('')}
                     />
                 )}
             </div>
@@ -120,7 +137,7 @@ const Groups = () => {
                         <ul>
                             {filteredRooms.map((room) => (
                                 <li key={room._id} className="group-item">
-                                    <div 
+                                    <div
                                         className="group-summary"
                                         onClick={() => toggleRoomExpand(room._id)}
                                     >
@@ -149,14 +166,14 @@ const Groups = () => {
                                     {expandedRoom === room._id && (
                                         <div className="group-members">
                                             <div className="member-actions">
-                                                <button 
+                                                <button
                                                     className="chat-btn"
                                                     onClick={() => handleJoinChat(room._id)}
                                                 >
                                                     <FaComments /> Join Chat
                                                 </button>
                                             </div>
-                                            
+
                                             <div className="room-details">
                                                 <h4>Room Details</h4>
                                                 <div className="room-info">
@@ -187,30 +204,30 @@ const Groups = () => {
                                             {room.participants && room.participants.length > 0 ? (
                                                 <ul className="members-list">
                                                     {room.participants
-                                                        .filter((participant, index, self) => 
+                                                        .filter((participant, index, self) =>
                                                             index === self.findIndex(p => p._id === participant._id)
                                                         )
                                                         .map((participant, index) => (
-                                                        <li key={`${participant._id}-${index}`} className="member-item">
-                                                            <div className="member-avatar">
-                                                                {participant.name?.charAt(0).toUpperCase()}
-                                                            </div>
-                                                            <div className="member-info">
-                                                                <div className="member-name-row">
-                                                                    <span className="member-name">{participant.name}</span>
-                                                                    <span className="member-role-badge">{participant.role}</span>
+                                                            <li key={`${participant._id}-${index}`} className="member-item">
+                                                                <div className="member-avatar">
+                                                                    {participant.name?.charAt(0).toUpperCase()}
                                                                 </div>
-                                                                <div className="member-details">
-                                                                    <span className="member-id">ID: {participant.customerId || participant.specialId || 'N/A'}</span>
-                                                                    <span className="member-email">{participant.email || 'No email'}</span>
+                                                                <div className="member-info">
+                                                                    <div className="member-name-row">
+                                                                        <span className="member-name">{participant.name}</span>
+                                                                        <span className="member-role-badge">{participant.role}</span>
+                                                                    </div>
+                                                                    <div className="member-details">
+                                                                        <span className="member-id">ID: {participant.customerId || participant.specialId || 'N/A'}</span>
+                                                                        <span className="member-email">{participant.email || 'No email'}</span>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <div className="member-status">
-                                                                <span className="status-indicator active"></span>
-                                                                <span className="status-text">Active</span>
-                                                            </div>
-                                                        </li>
-                                                    ))}
+                                                                <div className="member-status">
+                                                                    <span className="status-indicator active"></span>
+                                                                    <span className="status-text">Active</span>
+                                                                </div>
+                                                            </li>
+                                                        ))}
                                                 </ul>
                                             ) : (
                                                 <div className="no-participants">
@@ -241,7 +258,7 @@ const Groups = () => {
                             <input
                                 type="text"
                                 value={newRoom.name}
-                                onChange={(e) => setNewRoom({...newRoom, name: e.target.value})}
+                                onChange={(e) => setNewRoom({ ...newRoom, name: e.target.value })}
                                 placeholder="Enter room name"
                                 required
                             />
@@ -251,7 +268,7 @@ const Groups = () => {
                             <input
                                 type="text"
                                 value={newRoom.roomId}
-                                onChange={(e) => setNewRoom({...newRoom, roomId: e.target.value})}
+                                onChange={(e) => setNewRoom({ ...newRoom, roomId: e.target.value })}
                                 placeholder="Enter custom room ID (leave empty for auto-generate)"
                             />
                         </div>
@@ -259,8 +276,8 @@ const Groups = () => {
                             <button className="cancel-btn" onClick={() => setShowCreateModal(false)}>
                                 Cancel
                             </button>
-                            <button className="create-btn" onClick={CreateRoom}>
-                                Create Room
+                            <button className="create-btn" onClick={CreateRoom} disabled={creating}>
+                                {creating ? "Creating..." : "Create Room"}
                             </button>
                         </div>
                     </div>

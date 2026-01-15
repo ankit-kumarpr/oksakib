@@ -76,9 +76,9 @@ const MyGroups = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 {searchTerm && (
-                    <FaTimes 
-                        className="clear-search" 
-                        onClick={() => setSearchTerm('')} 
+                    <FaTimes
+                        className="clear-search"
+                        onClick={() => setSearchTerm('')}
                     />
                 )}
             </div>
@@ -95,7 +95,7 @@ const MyGroups = () => {
                         <ul>
                             {filteredGroups.map((group) => (
                                 <li key={group._id} className="group-item">
-                                    <div 
+                                    <div
                                         className="group-summary"
                                         onClick={() => toggleGroupExpand(group._id)}
                                     >
@@ -124,7 +124,7 @@ const MyGroups = () => {
                                     {expandedGroup === group._id && (
                                         <div className="group-members">
                                             <div className="group-actions">
-                                                <button 
+                                                <button
                                                     className="chat-btn"
                                                     onClick={() => handleJoinChat(group._id)}
                                                 >
