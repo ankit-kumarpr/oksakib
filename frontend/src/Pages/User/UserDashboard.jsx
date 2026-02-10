@@ -174,7 +174,7 @@ const UserDashboard = () => {
                                         <h4 className="room-name-new">{room.name}</h4>
                                         <p className="room-creator-new">Created by: {room.createdBy?.name || "Admin"}</p>
                                         <p className="room-id-new">ID: {room.roomId || room._id}</p>
-                                        <p className="room-seats-count-new">Users Seated: {room.seats?.length || 0}/8</p>
+                                        <p className="room-seats-count-new">{room.seats?.length || 0}</p>
                                     </div>
                                     <div className="room-right-content">
                                         <img src={logo} alt="Logo" className="room-side-logo" />
