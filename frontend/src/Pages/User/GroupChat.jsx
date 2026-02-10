@@ -9,6 +9,9 @@ import {
   FaChevronDown,
   FaChevronUp,
   FaSmile,
+  FaGift,
+  FaCog,
+  FaPowerOff,
 } from "react-icons/fa";
 import axios from "axios";
 import io from "socket.io-client";
@@ -39,11 +42,12 @@ const GroupChat = () => {
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState(null);
-  const [showMembers, setShowMembers] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [error, setError] = useState(null);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  // Default showMembers to true for the new design
+  const [showMembers, setShowMembers] = useState(true);
   const [showVideo, setShowVideo] = useState(
     userRole === "admin" || userRole === "superadmin"
   ); // Show video only for admin/superadmin
@@ -247,7 +251,7 @@ const GroupChat = () => {
   }
 
   return (
-    <div className="onetoone-container">
+    <div className="onetoone-container game-theme-container">
       {/* Video Overlay - Multiple Video Sources for Compatibility */}
       {showVideo && (
         <div
@@ -350,264 +354,87 @@ const GroupChat = () => {
       )}
 
       {/* Rest of your chat component remains exactly the same */}
-      {/* Chat Header */}
-      <div className="onetoone-header">
-        <button className="back-button" onClick={() => navigate(-1)}>
-          <FaArrowLeft size={20} />
-        </button>
-        <div className="user-avatar-container">
-          <div
-            className="user-avatar"
-            style={{ width: "40px", height: "40px", fontSize: "16px" }}
-          >
-            <FaUsers />
-          </div>
-          <div className="status-dot online"></div>
+      {/* Game Group Chat Header */}
+      <div className="game-group-header">
+        <div className="header-left">
+          <button className="back-button" onClick={() => navigate(-1)}>
+            <FaArrowLeft size={20} color="white" />
+          </button>
         </div>
-        <div className="header-info">
-          <h2>{group?.name}</h2>
+
+        <div className="header-center">
+          <h2>{group?.name || "Game group"}</h2>
           <p className="room-id">ID: {group?.roomId || groupId}</p>
         </div>
-        <button
-          className="members-toggle"
-          onClick={() => setShowMembers(!showMembers)}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "8px",
-            borderRadius: "50%",
-            transition: "background-color 0.2s",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "white",
-            gap: "4px",
-          }}
-        >
-          <FaUsers size={18} />
-          {showMembers ? (
-            <FaChevronUp size={12} />
-          ) : (
-            <FaChevronDown size={12} />
-          )}
-        </button>
+
+        <div className="header-right">
+          <button className="power-button">
+            <FaPowerOff size={20} color="white" />
+          </button>
+        </div>
       </div>
 
-      {/* Members Panel */}
-      {showMembers && (
-        <div
-          className="members-panel"
-          style={{
-            background: "#f0f2f5",
-            borderBottom: "1px solid #e9ecef",
-            padding: "16px",
-            height: "120px",
-            overflowX: "auto",
-            overflowY: "hidden",
-          }}
-        >
-          <div
-            className="members-header"
-            style={{
-              marginBottom: "12px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <h3
-              style={{
-                margin: 0,
-                fontSize: "14px",
-                fontWeight: "600",
-                color: "#075e54",
-              }}
-            >
-              Group Members
-            </h3>
-            <span
-              style={{
-                fontSize: "12px",
-                color: "#667781",
-              }}
-            >
-              {
-                Array.from(
-                  new Map(
-                    (group?.participants || group?.users || []).map((m) => [
-                      m._id,
-                      m,
-                    ])
-                  ).values()
-                ).length
-              }{" "}
-              members
-            </span>
-          </div>
-          {(group?.participants || group?.users) &&
-            (group.participants || group.users).length > 0 ? (
-            <div
-              className="members-slider"
-              style={{
-                display: "flex",
-                gap: "16px",
-                alignItems: "flex-start",
-                height: "79px",
-                overflowX: "auto",
-                overflowY: "hidden",
-                paddingBottom: "8px",
-              }}
-            >
-              {/* Filter out duplicate users based on _id */}
-              {Array.from(
-                new Map(
-                  (group.participants || group.users || []).map((m) => [
-                    m._id,
-                    m,
-                  ])
-                ).values()
-              ).map((member) => {
-                const isOnline = onlineUsers.some(
-                  (onlineUser) => onlineUser._id === member._id
-                );
-                return (
-                  <div
-                    key={member._id}
-                    className="member-slide"
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      minWidth: "60px",
-                      padding: "4px",
-                      cursor: "pointer",
-                      transition: "transform 0.2s",
-                    }}
-                  >
-                    <div
-                      className="member-avatar"
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        borderRadius: "50%",
-                        background:
-                          "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                        color: "white",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                        marginBottom: "6px",
-                        position: "relative",
-                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                        overflow: "hidden",
+      {/* Members Grid (Stage) */}
+      <div className="game-group-stage">
+        <div className="stage-grid">
+          {/* We need 8 spots. Fill with actual members, then empty spots if needed? 
+              User said "existing data". We show available members. 
+              Image shows 4x2 grid. */}
+          {Array.from(
+            new Map(
+              (group?.participants || group?.users || []).map((m) => [
+                m._id,
+                m,
+              ])
+            ).values()
+          ).slice(0, 8).map((member, index) => { // Limit to 8 for the "Stage" look? Or scrollable? Image implies 8 fixed spots. I'll make it wrap for more.
+            const isOnline = onlineUsers.some(
+              (onlineUser) => onlineUser._id === member._id
+            );
+            return (
+              <div key={member._id} className="stage-member">
+                <div className={`stage-avatar-container ${index === 1 ? 'active-speaker' : ''}`}>
+                  {member.avatar ? (
+                    <img
+                      src={
+                        member.avatar.startsWith("http")
+                          ? member.avatar
+                          : `${Socket_url}${member.avatar}`
+                      }
+                      alt={member.name}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
                       }}
-                    >
-                      {member.avatar ? (
-                        <img
-                          src={
-                            member.avatar.startsWith("http")
-                              ? member.avatar
-                              : `${Socket_url}${member.avatar}`
-
-                          }
-                          alt={member.name}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                            e.target.parentElement.innerHTML =
-                              member.name?.charAt(0).toUpperCase() || "U";
-                          }}
-                        />
-                      ) : (
-                        member.name?.charAt(0).toUpperCase() || "U"
-                      )}
-                      {isOnline && (
-                        <div
-                          className="online-indicator"
-                          style={{
-                            position: "absolute",
-                            bottom: "2px",
-                            right: "2px",
-                            width: "12px",
-                            height: "12px",
-                            background: "#25d366",
-                            borderRadius: "50%",
-                            border: "2px solid white",
-                            zIndex: 1,
-                          }}
-                        ></div>
-                      )}
-                    </div>
-                    <span
-                      className="member-name"
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: "500",
-                        color: "#111b21",
-                        textTransform: "capitalize",
-                        textAlign: "center",
-                        lineHeight: "1.2",
-                        maxWidth: "55px",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {member.name}
-                    </span>
+                    />
+                  ) : null}
+                  <div className="avatar-fallback" style={{ display: member.avatar ? 'none' : 'flex' }}>
+                    {member.name?.charAt(0).toUpperCase()}
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div
-              className="no-members"
-              style={{
-                textAlign: "center",
-                padding: "20px",
-                color: "#667781",
-              }}
-            >
-              <p style={{ margin: 0, fontSize: "14px" }}>No members found</p>
-            </div>
-          )}
+
+                  {isOnline && <span className="status-dot"></span>}
+                </div>
+                <span className="stage-name">{member.name}
+                  <span className="verified-tick">✓</span>
+                </span>
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
 
       {/* Messages Container */}
       <div
-        className="messages-container"
+        className="messages-container game-theme"
         ref={messagesContainerRef}
         style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "16px",
-          background: "#efeae2",
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+          // Styles moved to CSS
         }}
       >
         {messages.length === 0 ? (
-          <div
-            className="no-messages"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              color: "#667781",
-              textAlign: "center",
-            }}
-          >
-            <FaUsers size={48} style={{ marginBottom: "16px", opacity: 0.5 }} />
-            <p>No messages yet. Start the conversation!</p>
+          <div className="no-messages">
+            <FaUsers size={48} style={{ marginBottom: "16px", opacity: 0.5, color: 'white' }} />
+            <p style={{ color: 'white' }}>No messages yet. Start the conversation!</p>
           </div>
         ) : (
           <div className="messages-list">
@@ -649,55 +476,22 @@ const GroupChat = () => {
                   </div>
                 )}
 
-                <div
-                  className="message-bubble"
-                  style={{
-                    maxWidth: "70%",
-                    padding: "8px 12px",
-                    borderRadius: "7.5px",
-                    background:
-                      String(message.sender._id) === userId
-                        ? "#dcf8c6"
-                        : "#ffffff",
-                    boxShadow: "0 1px 0.5px rgba(0,0,0,0.13)",
-                    position: "relative",
-                  }}
-                >
+                <div className="message-bubble">
                   {String(message.sender._id) !== userId && (
-                    <span
-                      className="sender-name"
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: "600",
-                        color: "#075e54",
-                        textTransform: "capitalize",
-                        display: "block",
-                        marginBottom: "2px",
-                      }}
-                    >
+                    <span className="sender-name">
                       {message.sender.name}
                     </span>
                   )}
                   {message.message && (
                     <p
                       className="message-text"
-                      style={{
-                        margin: "0 0 4px 0",
-                        fontSize: "14px",
-                        lineHeight: "1.4",
-                        color: "#111b21",
-                        wordWrap: "break-word",
-                      }}
                       dangerouslySetInnerHTML={{
                         __html: wrapEmojis(message.message),
                       }}
                     />
                   )}
                   {message.file && (
-                    <div
-                      className="message-file"
-                      style={{ marginBottom: "4px" }}
-                    >
+                    <div className="message-file">
                       {/\.(jpeg|jpg|gif|png|webp)$/i.test(message.file) ? (
                         <img
                           src={message.file}
@@ -720,36 +514,15 @@ const GroupChat = () => {
                       )}
                     </div>
                   )}
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}
-                  >
-                    <span
-                      className="message-time"
-                      style={{
-                        fontSize: "11px",
-                        color: "#667781",
-                        marginTop: "2px",
-                      }}
-                    >
+                  <div className="message-meta">
+                    <span className="message-time">
                       {new Date(message.createdAt).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
                     </span>
                     {String(message.sender._id) === userId && (
-                      <span
-                        style={{
-                          fontSize: "10px",
-                          color: "#667781",
-                        }}
-                      >
-                        ✓✓
-                      </span>
+                      <span className="message-status">✓✓</span>
                     )}
                   </div>
                 </div>
@@ -761,148 +534,33 @@ const GroupChat = () => {
       </div>
 
       {/* Input Box */}
-      <form
-        className="message-input-container"
-        onSubmit={handleSendMessage}
-        style={{
-          padding: "8px 16px",
-          background: "#f0f2f5",
-          borderTop: "1px solid #e9ecef",
-        }}
-      >
+      <form className="game-input-area" onSubmit={handleSendMessage}>
         {showEmojiPicker && (
-          <div
-            className="emoji-picker-container"
-            style={{
-              position: "absolute",
-              bottom: "70px",
-              left: "16px",
-              right: "16px",
-              zIndex: 1000,
-            }}
-          >
-            <div
-              className="emoji-picker-overlay"
-              onClick={() => setShowEmojiPicker(false)}
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: "rgba(0,0,0,0.3)",
-                zIndex: -1,
-              }}
-            />
-            <div className="emoji-picker-wrapper">
-              <EmojiPicker
-                onEmojiClick={handleEmojiClick}
-                width="100%"
-                height={300}
-                theme="light"
-                searchDisabled={false}
-                skinTonesDisabled={true}
-                previewConfig={{
-                  showPreview: false,
-                }}
-              />
-            </div>
+          <div className="game-emoji-picker">
+            <div className="emoji-overlay" onClick={() => setShowEmojiPicker(false)}></div>
+            <EmojiPicker onEmojiClick={handleEmojiClick} />
           </div>
         )}
 
-        <div
-          className="input-wrapper"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            background: "white",
-            borderRadius: "24px",
-            padding: "4px 8px",
-          }}
-        >
+        <div className="chat-pill">
           <button
             type="button"
-            className="emoji-toggle"
+            className="emoji-btn"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "8px",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#8696a0",
-            }}
           >
-            <FaSmile size={20} />
+            <FaSmile />
           </button>
-
           <input
             type="text"
-            placeholder="Type a message..."
+            placeholder="say something..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            style={{
-              flex: 1,
-              border: "none",
-              outline: "none",
-              padding: "8px 12px",
-              fontSize: "15px",
-              background: "transparent",
-            }}
           />
+        </div>
 
-          <button
-            type="button"
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "8px",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#8696a0",
-            }}
-          >
-            <FaImage size={20} />
-          </button>
-
-          <button
-            type="submit"
-            disabled={!newMessage.trim() || sendingMessage}
-            style={{
-              background: newMessage.trim() ? "#075e54" : "#8696a0",
-              border: "none",
-              cursor: newMessage.trim() ? "pointer" : "not-allowed",
-              padding: "10px",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              transition: "background-color 0.2s",
-            }}
-          >
-            {sendingMessage ? (
-              <div
-                className="sending-spinner"
-                style={{
-                  width: "16px",
-                  height: "16px",
-                  border: "2px solid rgba(255,255,255,0.3)",
-                  borderRadius: "50%",
-                  borderTopColor: "white",
-                  animation: "spin 1s linear infinite",
-                }}
-              ></div>
-            ) : (
-              <FaPaperPlane size={16} />
-            )}
+        <div className="chat-actions">
+          <button type="submit" className="action-btn send-btn" disabled={!newMessage.trim() || sendingMessage}>
+            <FaPaperPlane />
           </button>
         </div>
       </form>
