@@ -12,6 +12,7 @@ import {
   FaGift,
   FaCog,
   FaPowerOff,
+  FaPlus,
 } from "react-icons/fa";
 import axios from "axios";
 import io from "socket.io-client";
@@ -52,6 +53,8 @@ const GroupChat = () => {
     userRole === "admin" || userRole === "superadmin"
   ); // Show video only for admin/superadmin
   const [videoError, setVideoError] = useState(false);
+  const [seats, setSeats] = useState([]); // Array of 8 seats
+  const [isSeated, setIsSeated] = useState(false);
   const messagesEndRef = useRef();
   const messagesContainerRef = useRef();
   const videoRef = useRef();
@@ -105,10 +108,17 @@ const GroupChat = () => {
         ]);
 
         console.log("Group data:", groupRes.data);
-        console.log("Group users/participants:", groupRes.data?.users);
-        console.log("Messages data:", messagesRes.data);
-
         setGroup(groupRes.data);
+
+        // NEW: Load initial seats from API response
+        if (groupRes.data?.seats) {
+          setSeats(groupRes.data.seats);
+          const seated = groupRes.data.seats.some(seat =>
+            (seat.userId?._id || seat.userId) === userId
+          );
+          setIsSeated(seated);
+        }
+
         setMessages(messagesRes.data || []);
         setLoading(false);
 
@@ -138,8 +148,24 @@ const GroupChat = () => {
       console.log("Successfully joined group:", data);
     });
 
+    newSocket.on("roomUpdate", (data) => {
+      console.log("Room update received:", data);
+      if (data.seats) {
+        setSeats(data.seats);
+        // Better way to check if current user is seated
+        const currentSeated = data.seats.some(seat => {
+          const seatUserId = seat.userId?._id || seat.userId;
+          return seatUserId === userId;
+        });
+        setIsSeated(currentSeated);
+      }
+    });
+
     newSocket.on("error", (error) => {
       console.error("Socket error:", error);
+      if (error.message.includes("seat")) {
+        alert(error.message);
+      }
     });
 
     return () => {
@@ -219,6 +245,23 @@ const GroupChat = () => {
 
   const handleSkipVideo = () => {
     setShowVideo(false);
+  };
+
+  const handleTakeSeat = (position) => {
+    if (isSeated) {
+      alert("You are already on a seat!");
+      return;
+    }
+
+    if (window.confirm("Do you want to take this seat?")) {
+      socket.emit("takeSeat", { groupId, userId, position });
+    }
+  };
+
+  const handleLeaveSeat = () => {
+    if (window.confirm("Do you want to leave your seat?")) {
+      socket.emit("leaveSeat", { groupId, userId });
+    }
   };
 
   if (loading) {
@@ -377,45 +420,60 @@ const GroupChat = () => {
       {/* Members Grid (Stage) */}
       <div className="game-group-stage">
         <div className="stage-grid">
-          {/* We need 8 spots. Fill with actual members, then empty spots if needed? 
-              User said "existing data". We show available members. 
-              Image shows 4x2 grid. */}
-          {Array.from(
-            new Map(
-              (group?.participants || group?.users || []).map((m) => [
-                m._id,
-                m,
-              ])
-            ).values()
-          ).slice(0, 8).map((member, index) => { // Limit to 8 for the "Stage" look? Or scrollable? Image implies 8 fixed spots. I'll make it wrap for more.
-            const isOnline = onlineUsers.some(
-              (onlineUser) => onlineUser._id === member._id
+          {Array.from({ length: 8 }).map((_, index) => {
+            const seat = seats.find(s => s.position === index);
+            const member = seat?.userId;
+            const isMe = member?._id === userId || member === userId;
+            const isOnline = member && onlineUsers.some(
+              (onlineUser) => onlineUser._id === (member._id || member)
             );
-            return (
-              <div key={member._id} className="stage-member">
-                <div className={`stage-avatar-container ${index === 1 ? 'active-speaker' : ''}`}>
-                  {member.avatar ? (
-                    <img
-                      src={
-                        member.avatar.startsWith("http")
-                          ? member.avatar
-                          : `${Socket_url}${member.avatar}`
-                      }
-                      alt={member.name}
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                      }}
-                    />
-                  ) : null}
-                  <div className="avatar-fallback" style={{ display: member.avatar ? 'none' : 'flex' }}>
-                    {member.name?.charAt(0).toUpperCase()}
-                  </div>
 
-                  {isOnline && <span className="status-dot"></span>}
+            return (
+              <div key={index} className="stage-member">
+                <div
+                  className={`stage-avatar-container ${isOnline ? 'active-speaker' : ''}`}
+                  onClick={() => {
+                    if (!member) handleTakeSeat(index);
+                    else if (isMe) handleLeaveSeat();
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {member ? (
+                    <>
+                      {member.avatar ? (
+                        <img
+                          src={
+                            member.avatar.startsWith("http")
+                              ? member.avatar
+                              : `${Socket_url}${member.avatar}`
+                          }
+                          alt={member.name}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className="avatar-fallback" style={{ display: member.avatar ? 'none' : 'flex' }}>
+                        {member.name?.charAt(0).toUpperCase()}
+                      </div>
+                      {isOnline && <span className="status-dot"></span>}
+                    </>
+                  ) : (
+                    <div className="empty-seat">
+                      <FaPlus color="rgba(255,255,255,0.5)" size={20} />
+                    </div>
+                  )}
                 </div>
-                <span className="stage-name">{member.name}
-                  <span className="verified-tick">✓</span>
+                <span className="stage-name">
+                  {member ? (
+                    <>
+                      {member.name}
+                      {(member.role === "admin" || member.role === "superadmin") && (
+                        <span className="verified-tick">✓</span>
+                      )}
+                    </>
+                  ) : `Seat ${index + 1}`}
                 </span>
               </div>
             );
@@ -552,14 +610,15 @@ const GroupChat = () => {
           </button>
           <input
             type="text"
-            placeholder="say something..."
+            placeholder={isSeated ? "say something..." : "Take a seat to chat"}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
+            disabled={!isSeated}
           />
         </div>
 
         <div className="chat-actions">
-          <button type="submit" className="action-btn send-btn" disabled={!newMessage.trim() || sendingMessage}>
+          <button type="submit" className="action-btn send-btn" disabled={!newMessage.trim() || sendingMessage || !isSeated}>
             <FaPaperPlane />
           </button>
         </div>

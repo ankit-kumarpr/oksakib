@@ -167,15 +167,17 @@ const UserDashboard = () => {
                             {filteredRooms.map((room) => (
                                 <div
                                     key={room._id}
-                                    className="room-tile"
+                                    className="room-tile-new"
                                     onClick={() => handleJoinRoom(room._id)}
                                 >
-                                    <div className="room-icon">
-                                        <FaUsers size={24} />
+                                    <div className="room-left-content">
+                                        <h4 className="room-name-new">{room.name}</h4>
+                                        <p className="room-creator-new">Created by: {room.createdBy?.name || "Admin"}</p>
+                                        <p className="room-id-new">ID: {room.roomId || room._id}</p>
+                                        <p className="room-seats-count-new">Users Seated: {room.seats?.length || 0}/8</p>
                                     </div>
-                                    <div className="room-info">
-                                        <h4 className="room-name">{room.name}</h4>
-                                        <p className="room-id">ID: {room.roomId?.substring(0, 8)}...</p>
+                                    <div className="room-right-content">
+                                        <img src={logo} alt="Logo" className="room-side-logo" />
                                     </div>
                                 </div>
                             ))}

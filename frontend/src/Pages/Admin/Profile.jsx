@@ -576,16 +576,18 @@ const Profile = () => {
         <div className="profile-name-id">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
             <h2 className="profile-display-name">{profile?.name || "User"}</h2>
-            <img
-              src={verifyIcon}
-              alt="Verified"
-              style={{
-                width: '20px',
-                height: '20px',
-                objectFit: 'contain',
-                marginLeft: '5px'
-              }}
-            />
+            {(profile?.role === "admin" || profile?.role === "superadmin") && (
+              <img
+                src={verifyIcon}
+                alt="Verified"
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  objectFit: 'contain',
+                  marginLeft: '5px'
+                }}
+              />
+            )}
           </div>
           <p className="profile-id">ID: {profile?.customerId || 'N/A'}</p>
         </div>

@@ -7,6 +7,10 @@ const roomSchema = new mongoose.Schema({
   defaultMainSeats: { type: Number, default: 8 },
   maxCapacity: { type: Number, default: 500 },
   participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  seats: [{
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    position: { type: Number }
+  }],
   createdAt: { type: Date, default: Date.now }
 });
 

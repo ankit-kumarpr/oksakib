@@ -57,7 +57,8 @@ exports.getRooms = async (req, res) => {
   try {
     const rooms = await Room.find()
       .populate('createdBy', 'name email phone role customerId avatar avatarFrame dob createdAt')
-      .populate('participants', 'name email phone role customerId avatar avatarFrame dob createdAt');
+      .populate('participants', 'name email phone role customerId avatar avatarFrame dob createdAt')
+      .populate('seats.userId', 'name avatar role');
 
     // Debug: Check avatar data specifically
     console.log('=== ROOMS DEBUG ===');
@@ -82,7 +83,8 @@ exports.getRoomById = async (req, res) => {
 
     const room = await Room.findById(id)
       .populate('createdBy', 'name email phone role customerId avatar avatarFrame dob createdAt')
-      .populate('participants', 'name email phone role customerId avatar avatarFrame dob createdAt');
+      .populate('participants', 'name email phone role customerId avatar avatarFrame dob createdAt')
+      .populate('seats.userId', 'name avatar role');
 
     if (!room) {
       return res.status(404).json({ message: 'Room not found' });
@@ -124,6 +126,7 @@ exports.getRoomById = async (req, res) => {
       name: room.name,
       roomId: room.roomId,
       users: room.participants, // Frontend expects 'users' not 'participants'
+      seats: room.seats, // NEW: Include seats
       createdBy: room.createdBy,
       createdAt: room.createdAt,
       maxCapacity: room.maxCapacity
